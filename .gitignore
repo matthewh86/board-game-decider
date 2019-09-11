@@ -1,3 +1,5 @@
 /.gradle/
 /.idea/
 /board-game-decider.iml
+/build/
+/out/
