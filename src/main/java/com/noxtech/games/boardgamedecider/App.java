@@ -1,5 +1,7 @@
 package com.noxtech.games.boardgamedecider;
 
+import static java.util.Arrays.asList;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,24 +20,33 @@ public class App {
 
     public static void main(String[] args) throws IOException {
         int numPlayers = 4;
+        List<String> owners = asList("MSM");
 
         File csvFile = new File(App.class.getClassLoader().getResource("boardgames.csv").getFile());
         CsvMapper mapper = new CsvMapper();
         CsvSchema schema = new CsvMapper().schemaFor(BoardGame.class);
         MappingIterator<BoardGame> it = mapper.readerFor(BoardGame.class).with(schema).readValues(csvFile);
-        List<BoardGame> games = it.readAll().stream().filter(boardGame -> boardGame.getMaxPlayers() >= numPlayers).collect(Collectors.toList());
+        List<BoardGame> games = it.readAll().stream()
+            .filter(boardGame -> boardGame.getMaxPlayers() >= numPlayers)
+            .filter(boardGame -> owners.contains(boardGame.getOwner()))
+            .collect(Collectors.toList());
 
         List<Integer> choices = new ArrayList<>();
 
-        choices.add(addChoice(choices, games.size()));
-        if (games.size() >= 3) {
+        if (!games.isEmpty()) {
             choices.add(addChoice(choices, games.size()));
-            choices.add(addChoice(choices, games.size()));
+            if (games.size() >= 3) {
+                choices.add(addChoice(choices, games.size()));
+                choices.add(addChoice(choices, games.size()));
+            }
+
+            for (int choice : choices) {
+                System.out.println(games.get(choice));
+            }
+        } else {
+            System.out.println("No games selected!");
         }
 
-        for (int choice : choices) {
-            System.out.println(games.get(choice));
-        }
     }
 
     private static Integer addChoice(List<Integer> choices, int size) {
